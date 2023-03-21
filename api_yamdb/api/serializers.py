@@ -44,15 +44,24 @@ class GenreSerializer(ModelSerializer):
     
     class Meta:
         model = Genre
-
+        fields = ('name', 'slug')
 
 class CategorySerializer(ModelSerializer):
     
     class Meta:
         model = Category
+        fields = ('name', 'slug')
 
 
 class TitleSerializer(ModelSerializer):
     
     class Meta:
         model = Title
+        fields = (
+            'name',
+            'description',
+            'year',
+            'rating',
+            'genre',
+            'category',
+        )
