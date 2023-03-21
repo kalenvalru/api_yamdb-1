@@ -1,5 +1,7 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from django.db.models import CharField, EmailField, TextField, UUIDField
 
 from .validators import validate_username
 
@@ -15,7 +17,7 @@ ROLE_CHOICES = (
 
 
 class User(AbstractUser):
-    username = models.CharField(
+    username = CharField(
         'Имя пользователя',
         validators=(validate_username,),
         max_length=150,
@@ -23,45 +25,40 @@ class User(AbstractUser):
         blank=False,
         null=False
     )
-    email = models.EmailField(
+    email = EmailField(
         'Адрес электронной почты',
         max_length=254,
         unique=True,
         blank=False,
         null=False
     )
-    first_name = models.CharField(
+    first_name = CharField(
         'Имя',
         max_length=150,
         blank=True
     )
-    last_name = models.CharField(
+    last_name = CharField(
         'Фамилия',
         max_length=150,
         blank=True
     )
-    bio = models.TextField(
+    bio = TextField(
         'Биография',
         blank=True,
     )
-    role = models.CharField(
+    role = CharField(
         'Роль',
         max_length=20,
         choices=ROLE_CHOICES,
         default=USER,
         blank=True
     )
-    confirmation_code = models.CharField(
-        'Код подтверждения',
-        max_length=255,
-        null=True,
-        blank=False,
-        default='XXXX'
+    confirmation_code = UUIDField(
+        'Код для получения/обновления токена',
+        default=uuid.uuid4,
+        editable=False,
+        unique=True
     )
-
-    @property
-    def is_user(self):
-        return self.role == USER
 
     @property
     def is_admin(self):
