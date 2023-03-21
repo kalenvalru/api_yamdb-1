@@ -1,4 +1,6 @@
-from rest_framework.serializers import ModelSerializer
+from django.contrib.auth.validators import UnicodeUsernameValidator
+from rest_framework.serializers import (CharField, ModelSerializer, Serializer,
+                                        ValidationError)
 from reviews.models import Category, Genre, Title
 from users.models import User
 
@@ -7,15 +9,23 @@ class UsersSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = (
-            'username', 'email', 'first_name',
-            'last_name', 'bio', 'role'
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
+
+    def validate_username(self, value):
+        if (value == 'me'):
+            raise ValidationError(
+                'Запрещено использовать me в качестве username.'
+            )
+        return value
 
 
 class NotAdminSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role'
+        )
         read_only_fields = ('role',)
 
 
@@ -24,11 +34,19 @@ class SignUpSerializer(ModelSerializer):
         model = User
         fields = ('email', 'username')
 
+    def validate_username(self, value):
+        if (value == 'me'):
+            raise ValidationError(
+                'Запрещено использовать me в качестве username.'
+            )
+        return value
 
-class TokenSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('username', 'confirmation_code')
+
+class TokenSerializer(Serializer):
+    username = CharField(
+        max_length=150, validators=[UnicodeUsernameValidator, ]
+    )
+    confirmation_code = CharField()
 
 
 class GenreSerializer(ModelSerializer):

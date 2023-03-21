@@ -4,7 +4,6 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import (CASCADE, SET_NULL, CharField, DateTimeField,
                               ForeignKey, IntegerField, ManyToManyField, Model,
                               SlugField, TextField, UniqueConstraint)
-
 from users.models import User
 
 
