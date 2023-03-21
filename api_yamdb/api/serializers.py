@@ -1,6 +1,6 @@
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from rest_framework.serializers import (CharField, ModelSerializer, Serializer,
-                                        ValidationError)
+from rest_framework.serializers import CharField, ModelSerializer, Serializer
+
 from reviews.models import Category, Genre, Title
 from users.models import User
 
@@ -11,13 +11,6 @@ class UsersSerializer(ModelSerializer):
         fields = (
             'username', 'email', 'first_name', 'last_name', 'bio', 'role'
         )
-
-    def validate_username(self, value):
-        if (value == 'me'):
-            raise ValidationError(
-                'Запрещено использовать me в качестве username.'
-            )
-        return value
 
 
 class NotAdminSerializer(ModelSerializer):
@@ -33,13 +26,6 @@ class SignUpSerializer(ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'username')
-
-    def validate_username(self, value):
-        if (value == 'me'):
-            raise ValidationError(
-                'Запрещено использовать me в качестве username.'
-            )
-        return value
 
 
 class TokenSerializer(Serializer):

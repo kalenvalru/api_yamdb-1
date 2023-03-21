@@ -31,7 +31,10 @@ class IsAuthorModeratorAdminOrReadOnlyPermission(permissions.BasePermission):
 
 
 class IsAdminOrReadOnlyPermission(permissions.BasePermission):
-    """Обеспечивает доступ администратору. Для остальных только безопасные методы."""
+    """
+    Обеспечивает доступ администратору.
+    Для остальных только безопасные методы.
+    """
     def has_permission(self, request, view):
         if request.user.is_authenticated:
             return (request.user.is_admin or request.user.is_superuser)
