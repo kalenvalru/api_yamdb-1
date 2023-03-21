@@ -30,14 +30,12 @@ class SignUpViewSet(APIView):
             serializer = SignUpSerializer(user, data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        username = request.data.get('username')
-        user = User.objects.get(username=username)
-        code = user.confirmation_code
+        user = User.objects.get(username=request.data.get('username'))
         send_mail(
             subject='Код подтверждения для доступа к API YaMDb.',
             message=(
                 f'Здравствуйте!\n\n'
-                f'Ваш confirmation_code: {code}\n'
+                f'Ваш confirmation_code: {user.confirmation_code}\n'
                 f'Он необходим для получения и последующего обновления токена '
                 f'по адресу api/v1/auth/token/.'
             ),
