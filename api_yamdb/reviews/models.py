@@ -100,9 +100,8 @@ class Review(Model):
         related_name='reviews',
         on_delete=CASCADE,
     )
-    text = CharField(
+    text = TextField(
         verbose_name='Текст отзыва',
-        max_length=200
     )
     author = ForeignKey(
         User,
@@ -113,10 +112,9 @@ class Review(Model):
     score = IntegerField(
         verbose_name='Оценка',
         validators=(
-            MinValueValidator(1),
-            MaxValueValidator(10)
+            MinValueValidator(1, 'Минимальная оценка - 1'),
+            MaxValueValidator(10, 'Максимальная оценка - 10')
         ),
-        error_messages={'validators': 'Оценка от 1 до 10!'}
     )
     pub_date = DateTimeField(
         verbose_name='Дата публикации',
@@ -130,7 +128,7 @@ class Review(Model):
         constraints = [
             UniqueConstraint(
                 fields=('title', 'author', ),
-                name='unique review'
+                name='unique_title_author'
             )]
         ordering = ('pub_date',)
 
@@ -145,9 +143,8 @@ class Comment(Model):
         related_name='comments',
         on_delete=CASCADE
     )
-    text = CharField(
+    text = TextField(
         verbose_name='Текст комментария',
-        max_length=200
     )
     author = ForeignKey(
         User,
