@@ -1,24 +1,25 @@
-
-from django.core.mail import EmailMessage
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import (HTTP_200_OK, HTTP_201_CREATED,
-                                   HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND)
+                                   HTTP_400_BAD_REQUEST)
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
+
 from reviews.models import Category, Genre, Title
 from users.models import User
 
 from .permissions import AdminOnly
 from .serializers import (CategorySerializer, GenreSerializer,
-                          GetTokenSerializer, NotAdminSerializer,
-                          SignUpSerializer, TitleSerializer, UsersSerializer)
+                          NotAdminSerializer, SignUpSerializer,
+                          TitleSerializer, TokenSerializer, UsersSerializer)
 
 
-class APISignup(APIView):
+class SignUpViewSet(APIView):
     """
     Получить код подтверждения на переданный email. Права доступа: Доступно без
     токена. Использовать имя 'me' в качестве username запрещено. Поля email и
@@ -30,33 +31,23 @@ class APISignup(APIView):
     """
     permission_classes = (AllowAny,)
 
-    @staticmethod
-    def send_email(data):
-        email = EmailMessage(
-            subject=data['email_subject'],
-            body=data['email_body'],
-            to=[data['to_email']]
-        )
-        email.send()
-
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        email_body = (
-            f'Доброе время суток, {user.username}.'
-            f'\nКод подтверждения для доступа к API: {user.confirmation_code}'
+        send_mail(
+            subject='Регистрации YaMDb.',
+            message=(
+                f'Здравствуйте!\n'
+                f'Код подтверждения: {user.confirmation_code}'
+            ),
+            from_email='support@yamdb.com',
+            recipient_list=[user.email]
         )
-        data = {
-            'email_body': email_body,
-            'to_email': user.email,
-            'email_subject': 'Код подтверждения для доступа к API!'
-        }
-        self.send_email(data)
         return Response(serializer.data, status=HTTP_200_OK)
 
 
-class APIGetToken(APIView):
+class TokenViewSet(APIView):
     """
     Получение JWT-токена в обмен на username и confirmation code.
     Права доступа: Доступно без токена. Пример тела запроса:
@@ -66,22 +57,20 @@ class APIGetToken(APIView):
     }
     """
     def post(self, request):
-        serializer = GetTokenSerializer(data=request.data)
+        serializer = TokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        try:
-            user = User.objects.get(username=data['username'])
-        except User.DoesNotExist:
-            return Response(
-                {'username': 'Пользователь не найден!'},
-                status=HTTP_404_NOT_FOUND)
+        user = get_object_or_404(User, username=data.get('username'))
         if data.get('confirmation_code') == user.confirmation_code:
             token = RefreshToken.for_user(user).access_token
-            return Response({'token': str(token)},
-                            status=HTTP_201_CREATED)
+            return Response(
+                {'token': str(token)},
+                status=HTTP_201_CREATED
+            )
         return Response(
-            {'confirmation_code': 'Неверный код подтверждения!'},
-            status=HTTP_400_BAD_REQUEST)
+            {'confirmation_code': 'Неверный код подтверждения.'},
+            status=HTTP_400_BAD_REQUEST
+        )
 
 
 class UsersViewSet(ModelViewSet):
@@ -91,6 +80,7 @@ class UsersViewSet(ModelViewSet):
     lookup_field = 'username'
     filter_backends = (SearchFilter, )
     search_fields = ('username', )
+    http_method_names = ('get', 'post', 'patch', 'delete')
 
     @action(
         methods=['GET', 'PATCH'],
