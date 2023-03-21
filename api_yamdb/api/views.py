@@ -4,15 +4,18 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_201_CREATED, HTTP_404_NOT_FOUND
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.status import (HTTP_200_OK, HTTP_201_CREATED,
+                                   HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND)
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
-
+from rest_framework_simplejwt.tokens import RefreshToken
+from reviews.models import Category, Genre, Title
 from users.models import User
 
 from .permissions import AdminOnly
-from .serializers import NotAdminSerializer, SignUpSerializer, UsersSerializer, GetTokenSerializer
+from .serializers import (CategorySerializer, GenreSerializer,
+                          GetTokenSerializer, NotAdminSerializer,
+                          SignUpSerializer, TitleSerializer, UsersSerializer)
 
 
 class APISignup(APIView):
@@ -111,3 +114,18 @@ class UsersViewSet(ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=HTTP_200_OK)
         return Response(serializer.data)
+
+
+class TitleViewSet(ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+
+class GenreViewSet(ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
