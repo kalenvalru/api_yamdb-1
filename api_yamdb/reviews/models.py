@@ -57,19 +57,9 @@ class Title(Model):
     )
     year = IntegerField(
         verbose_name='Год выпуска',
-        validators=[
+        validators=(
             MaxValueValidator(date.today().year),
-        ]
-    )
-    rating = IntegerField(
-        verbose_name='Рейтинг',
-        validators=[
-            MinValueValidator(1),
-            MaxValueValidator(10),
-        ],
-        null=True,
-        blank=True,
-        default=None,
+        )
     )
     genre = ManyToManyField(
         Genre,

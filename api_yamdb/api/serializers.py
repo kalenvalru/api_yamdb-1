@@ -1,6 +1,7 @@
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from rest_framework.serializers import CharField, ModelSerializer, Serializer
-
+from rest_framework.serializers import (CharField, IntegerField,
+                                        ModelSerializer, Serializer,
+                                        SlugRelatedField)
 from reviews.models import Category, Genre, Title
 from users.models import User
 
@@ -47,10 +48,46 @@ class CategorySerializer(ModelSerializer):
         fields = ('name', 'slug')
 
 
-class TitleSerializer(ModelSerializer):
+class TitleWriteSerializer(ModelSerializer):
+    category = SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug',
+        many=False,
+    )
+    genre = SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True,
+    )
+
     class Meta:
         model = Title
         fields = (
+            'id',
+            'name',
+            'description',
+            'year',
+            'genre',
+            'category',
+        )
+
+
+class TitleReadSerializer(ModelSerializer):
+    category = CategorySerializer(
+        read_only=True
+    )
+    genre = GenreSerializer(
+        many=True,
+        read_only=True,
+    )
+    rating = IntegerField(
+        read_only=True
+    )
+
+    class Meta:
+        model = Title
+        fields = (
+            'id',
             'name',
             'description',
             'year',

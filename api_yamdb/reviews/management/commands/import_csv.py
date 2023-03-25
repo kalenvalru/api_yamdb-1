@@ -13,12 +13,12 @@ DATABASES_DICT = {
     Review: 'review.csv',
     Comment: 'comments.csv',
     Title.genre.through: 'genre_title.csv',
- }
+}
 
 
 class Command(BaseCommand):
     help = 'Loads the data from csv files located in static/data folder'
-    
+
     def handle(self, *args, **options):
         for model, csv_file in DATABASES_DICT.items():
             with open(
