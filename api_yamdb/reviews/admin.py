@@ -33,7 +33,6 @@ class TitleAdmin(admin.ModelAdmin):
         'pk',
         'name',
         'year',
-        'rating',
         'category',
         'description',
     )
