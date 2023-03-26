@@ -2,8 +2,10 @@ from datetime import date
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import (CASCADE, SET_NULL, CharField, DateTimeField,
-                              ForeignKey, PositiveIntegerField, ManyToManyField, Model,
-                              SlugField, TextField, UniqueConstraint)
+                              ForeignKey, ManyToManyField, Model,
+                              PositiveIntegerField, SlugField, TextField,
+                              UniqueConstraint)
+
 from users.models import User
 
 
