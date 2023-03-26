@@ -15,7 +15,8 @@ from users.models import User
 from .filters import FilterTitleSet
 
 from .permissions import (IsAdminOnlyPermission, IsAdminOrReadOnlyPermission,
-                          SelfEditUserOnlyPermission, IsAuthorModeratorAdminOrReadOnlyPermission)
+                          SelfEditUserOnlyPermission,
+                          IsAuthorModeratorAdminOrReadOnlyPermission)
 from .serializers import (CategorySerializer, GenreSerializer,
                           NotAdminSerializer, SignUpSerializer,
                           TitleReadSerializer, TitleWriteSerializer,
@@ -77,7 +78,7 @@ class TokenViewSet(APIView):
 
 
 class UsersViewSet(ModelViewSet):
-    """Получение и редактирование информации о пользователе,
+    """Получение и редактирование информации о пользователях(-е),
     удаление пользователя.
     """
     queryset = User.objects.all()
@@ -107,6 +108,9 @@ class UsersViewSet(ModelViewSet):
 
 
 class TitleViewSet(ModelViewSet):
+    """Получение список всех произведений.
+    Получение, добавление, редактирование информации и удаление произведения.
+    """
     queryset = Title.objects.all().annotate(rating=Avg('reviews__score'))
     permission_classes = (IsAdminOrReadOnlyPermission,)
     filter_backends = (DjangoFilterBackend,)
@@ -119,6 +123,7 @@ class TitleViewSet(ModelViewSet):
 
 
 class CategoryViewSet(GetListCreateDeleteViewSet):
+    """Получение список всех категорий. Добавление и удаления категории."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminOrReadOnlyPermission,)
@@ -128,6 +133,7 @@ class CategoryViewSet(GetListCreateDeleteViewSet):
 
 
 class GenreViewSet(GetListCreateDeleteViewSet):
+    """Получение список всех жанров. Добавление и удаления жанра."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrReadOnlyPermission,)
@@ -137,6 +143,9 @@ class GenreViewSet(GetListCreateDeleteViewSet):
 
 
 class CommentViewSet(ModelViewSet):
+    """Получить список всех отзывов.
+    Получение, добавление, редактирование информации и удаление отзыва.
+    """
     serializer_class = CommentSerializer
     permission_classes = (IsAuthorModeratorAdminOrReadOnlyPermission,)
 
@@ -154,6 +163,10 @@ class CommentViewSet(ModelViewSet):
 
 
 class ReviewViewSet(ModelViewSet):
+    """Получить список всех комментариев к отзыву.
+    Получение, добавление, редактирование информации и
+    удаление комментариея к отзыву.
+    """
     serializer_class = ReviewSerializer
     permission_classes = (IsAuthorModeratorAdminOrReadOnlyPermission,)
 

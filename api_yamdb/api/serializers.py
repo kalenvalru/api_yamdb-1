@@ -4,11 +4,13 @@ from rest_framework.serializers import (CharField, IntegerField,
                                         ModelSerializer, Serializer,
                                         SlugRelatedField)
 from django.core.exceptions import ValidationError
+
 from reviews.models import Category, Genre, Title, Review, Comment
 from users.models import User
 
 
 class UsersSerializer(ModelSerializer):
+    """Сериализатор для пользователя с ролью 'moderator', 'admin'."""
     class Meta:
         model = User
         fields = (
@@ -17,6 +19,7 @@ class UsersSerializer(ModelSerializer):
 
 
 class NotAdminSerializer(ModelSerializer):
+    """Сериализатор для пользователя с ролью 'user'."""
     class Meta:
         model = User
         fields = (
@@ -26,12 +29,14 @@ class NotAdminSerializer(ModelSerializer):
 
 
 class SignUpSerializer(ModelSerializer):
+    """Сериализатор для получение кода подтверждения."""
     class Meta:
         model = User
         fields = ('email', 'username')
 
 
 class TokenSerializer(Serializer):
+    """Сериализатор для получение JWT-токена."""
     username = CharField(
         max_length=150, validators=[UnicodeUsernameValidator, ]
     )
@@ -39,18 +44,23 @@ class TokenSerializer(Serializer):
 
 
 class GenreSerializer(ModelSerializer):
+    """Сериализатор для всех доступных действий с жанрами."""
     class Meta:
         model = Genre
         fields = ('name', 'slug')
 
 
 class CategorySerializer(ModelSerializer):
+    """Сериализатор для всех доступных действий с категориями."""
     class Meta:
         model = Category
         fields = ('name', 'slug')
 
 
 class TitleWriteSerializer(ModelSerializer):
+    """Сериализатор для добавления и
+    частичного изменения информации о произведении.
+    """
     category = SlugRelatedField(
         queryset=Category.objects.all(),
         slug_field='slug',
@@ -75,6 +85,7 @@ class TitleWriteSerializer(ModelSerializer):
 
 
 class TitleReadSerializer(ModelSerializer):
+    """Сериализатор для всех доступных безопасных методов у произведений."""
     category = CategorySerializer(
         read_only=True
     )
@@ -100,6 +111,7 @@ class TitleReadSerializer(ModelSerializer):
 
 
 class ReviewSerializer(ModelSerializer):
+    """Сериализатор для всех доступных действий с отывами."""
     title = SlugRelatedField(
         slug_field='name',
         read_only=True
@@ -111,7 +123,7 @@ class ReviewSerializer(ModelSerializer):
 
     def validate_score(self, value):
         if 0 > value > 10:
-            raise ValidationError('Оценка по 10-бальной шкале!')
+            raise ValidationError('Оценка по 10-бальной шкале.')
         return value
 
     def validate(self, data):
@@ -123,7 +135,7 @@ class ReviewSerializer(ModelSerializer):
             request.method == 'POST'
             and Review.objects.filter(title=title, author=author).exists()
         ):
-            raise ValidationError('Может существовать только один отзыв!')
+            raise ValidationError('Может существовать только один отзыв.')
         return data
 
     class Meta:
@@ -132,6 +144,7 @@ class ReviewSerializer(ModelSerializer):
 
 
 class CommentSerializer(ModelSerializer):
+    """Сериализатор для всех доступных действий с комментариями к отзывам."""
     review = SlugRelatedField(
         slug_field='text',
         read_only=True
