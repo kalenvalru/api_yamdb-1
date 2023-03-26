@@ -2,8 +2,10 @@ from datetime import date
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import (CASCADE, SET_NULL, CharField, DateTimeField,
-                              ForeignKey, IntegerField, ManyToManyField, Model,
-                              SlugField, TextField, UniqueConstraint)
+                              ForeignKey, ManyToManyField, Model,
+                              PositiveIntegerField, SlugField, TextField,
+                              UniqueConstraint)
+
 from users.models import User
 
 
@@ -21,6 +23,7 @@ class Genre(Model):
     class Meta:
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -40,6 +43,7 @@ class Category(Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+        ordering = ('name',)
 
     def __str__(self):
         return self.name
@@ -55,11 +59,12 @@ class Title(Model):
         null=True,
         blank=True,
     )
-    year = IntegerField(
+    year = PositiveIntegerField(
         verbose_name='Год выпуска',
         validators=(
             MaxValueValidator(date.today().year),
-        )
+        ),
+        db_index=True,
     )
     genre = ManyToManyField(
         Genre,
@@ -78,6 +83,7 @@ class Title(Model):
     class Meta:
         verbose_name = 'Произведение'
         verbose_name_plural = 'Произведения'
+        ordering = ('year',)
 
     def __str__(self):
         return self.name
@@ -99,7 +105,7 @@ class Review(Model):
         related_name='reviews',
         on_delete=CASCADE,
     )
-    score = IntegerField(
+    score = PositiveIntegerField(
         verbose_name='Оценка',
         validators=(
             MinValueValidator(1, 'Минимальная оценка - 1'),
@@ -151,6 +157,7 @@ class Comment(Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+        ordering = ('pub_date',)
 
     def __str__(self):
         return self.text

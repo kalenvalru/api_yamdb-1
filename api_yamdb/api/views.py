@@ -10,19 +10,21 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Title, Review
-from users.models import User
-from .filters import FilterTitleSet
 
-from .permissions import (IsAdminOnlyPermission, IsAdminOrReadOnlyPermission,
-                          SelfEditUserOnlyPermission,
-                          IsAuthorModeratorAdminOrReadOnlyPermission)
-from .serializers import (CategorySerializer, GenreSerializer,
-                          NotAdminSerializer, SignUpSerializer,
-                          TitleReadSerializer, TitleWriteSerializer,
-                          TokenSerializer, UsersSerializer,
-                          CommentSerializer, ReviewSerializer)
+from api_yamdb.settings import EMAIL_HOST
+from reviews.models import Category, Genre, Review, Title
+from users.models import User
+
+from .filters import FilterTitleSet
 from .mixins import GetListCreateDeleteViewSet
+from .permissions import (IsAdminOnlyPermission, IsAdminOrReadOnlyPermission,
+                          IsAuthorModeratorAdminOrReadOnlyPermission,
+                          SelfEditUserOnlyPermission)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, NotAdminSerializer,
+                          ReviewSerializer, SignUpSerializer,
+                          TitleReadSerializer, TitleWriteSerializer,
+                          TokenSerializer, UsersSerializer)
 
 
 class SignUpViewSet(APIView):
@@ -46,7 +48,7 @@ class SignUpViewSet(APIView):
                 f'Он необходим для получения и последующего обновления токена '
                 f'по адресу api/v1/auth/token/.'
             ),
-            from_email='support@yamdb.com',
+            from_email=EMAIL_HOST,
             recipient_list=[request.data.get('email')],
             fail_silently=False,
         )
@@ -95,16 +97,19 @@ class UsersViewSet(ModelViewSet):
     )
     def me_user(self, request):
         if request.method == 'GET':
-            user = User.objects.get(username=request.user)
+            user = get_object_or_404(
+                User, username=request.user
+            )
             serializer = self.get_serializer(user)
             return Response(serializer.data)
 
-        user = User.objects.get(username=request.user)
+        user = get_object_or_404(
+            User, username=request.user
+        )
         serializer = NotAdminSerializer(user, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=HTTP_200_OK)
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=HTTP_200_OK)
 
 
 class TitleViewSet(ModelViewSet):
@@ -152,13 +157,15 @@ class CommentViewSet(ModelViewSet):
     def get_queryset(self):
         review = get_object_or_404(
             Review,
-            id=self.kwargs.get('review_id'))
+            id=self.kwargs.get('review_id'),
+            title_id=self.kwargs.get('title_id'))
         return review.comments.all()
 
     def perform_create(self, serializer):
         review = get_object_or_404(
             Review,
-            id=self.kwargs.get('review_id'))
+            id=self.kwargs.get('review_id'),
+            title_id=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, review=review)
 
 
