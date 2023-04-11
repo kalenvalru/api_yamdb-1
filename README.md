@@ -46,7 +46,9 @@ python3 manage.py migrate | python manage.py migrate
 python3 manage.py runserver | python3 manage.py runserver
 ```
 ## Авторы
-@esaviv @RoutTufuch @Zhenia1997
+esaviv: система регистрации и аутентификации, права доступа, работа с токеном, система подтверждения через e-mail.
+RoutTufuch: модели, view и эндпойнты для произведений, категорий, жанров; реализация импорта данных из csv файлов.
+Zhenia1997: отзывы, комментарии, рейтинг произведений.
 
 ## Алгоритм регистрации пользователей:
 
