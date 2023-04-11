@@ -45,7 +45,8 @@ python3 manage.py migrate | python manage.py migrate
 ```
 python3 manage.py runserver | python3 manage.py runserver
 ```
-
+## Авторы
+@esaviv @RoutTufuch @Zhenia1997
 
 ## Алгоритм регистрации пользователей:
 
